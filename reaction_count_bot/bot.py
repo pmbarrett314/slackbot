@@ -123,27 +123,36 @@ class EmojiCountBot():
         self.register_handler("\<@({})\>:? downvote :(.*):".format(self.bot_id), self.handle_downvote)
         self.register_handler("\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot_id), self.handle_say)
 
+    def say_in_channel(self, message, channel):
+        self.slack_client.api_call("chat.postMessage", text=message, channel=channel, as_user=True)
+
     def handle_say(self, match_object, message_object):
         message = match_object.group(2)
         channel = match_object.group(3)
-        self.slack_client.api_call("chat.postMessage", text=message, channel=channel)
+        self.say_in_channel(message, channel)
 
     def handle_table_flip(self, match_object, message_object):
-        self.slack_client.api_call("chat.postMessage", text="┬{}┬ノ(ಠ_ಠノ)".format("─" * len(match_object.group(1))), channel=message_object.channel)
+        message="┬{}┬ノ(ಠ_ಠノ)".format("─" * len(match_object.group(1)))
+        channel=message_object.channel
+        self.say_in_channel(message, channel)
 
     def handle_score_request(self, match_object, message_object):
         user = match_object.group(2)
         user_name = self.slack_client.get_user_name(user)
         score = self.emoji_counter.score(user)
         self.log.info("Score for: {}: {}".format(user_name, score))
-        self.slack_client.api_call("chat.postMessage", text="Score for <@{}> is {}".format(user, score), channel=message_object.channel)
+        message = "Score for <@{}> is {}".format(user, score)
+        channel = message_object.channel
+        self.say_in_channel(message, channel)
 
     def handle_score_me(self, match_object, message_object):
         user = message_object.sender_id
         user_name = self.slack_client.get_user_name(user)
         score = self.emoji_counter.score(user)
         self.log.info("Score for: {}: {}".format(user_name, score))
-        self.slack_client.api_call("chat.postMessage", text="Score for <@{}> is {}".format(user, score), channel=message_object.channel)
+        message="Score for <@{}> is {}".format(user, score)
+        channel=message_object.channel
+        self.say_in_channel(message, channel)
 
     def handle_upvote(self, match_object, message_object):
         user = message_object.sender_id
