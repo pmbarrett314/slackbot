@@ -136,15 +136,18 @@ class MySlackClient(SlackClient):
             if not resp["ok"]:
                 raise Exception(str(resp))
             else:
+                for message in messages:
+                    message["channel"] = channel
                 messages.extend(resp["messages"])
             while resp["has_more"]:
                 resp = self.api_call("channels.history", channel=channel, latest=messages[-1]["ts"], oldest=timestamp)
                 if not resp["ok"]:
                     raise Exception(str(resp))
                 else:
+                    for message in messages:
+                        message["channel"] = channel
                     messages.extend(resp["messages"])
         for message in messages:
-            message_object = None
             if not only_reacted_to or "reactions" in message:
                 message_object = parse_slack_message(message)
                 if message_object is not None:
