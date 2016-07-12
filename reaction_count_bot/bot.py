@@ -1,11 +1,9 @@
-import os
 import re
 import time
 from my_slack_client import MySlackClient
 from slack_messages import parse_slack_message
 from emoji_counter import EmojiCounter
 import logging
-import coloredlogs
 import logging.handlers
 import signal
 import sys
@@ -14,18 +12,12 @@ from collections import defaultdict
 BOT_NAME = 'paulbot'
 
 
-def get_api_key():
-    with open(os.path.join("..","private",".apikey"), "r") as keyfile:
-        return keyfile.read().strip()
-
-
 class EmojiCountBot():
 
-    def __init__(self):
+    def __init__(self, apikey):
         self.log = logging.getLogger("paulbot")
 
-
-        self.slack_client = MySlackClient(get_api_key())
+        self.slack_client = MySlackClient(apikey)
         self.should_continue_running = True
 
         self.bot_name = None
@@ -37,7 +29,6 @@ class EmojiCountBot():
         self.message_handlers = defaultdict(list)
 
         self.emoji_counter = EmojiCounter(self.slack_client)
-        
 
     def exit_handler(self, signal, frame):
         self.log.info("\nExiting...")
@@ -135,8 +126,8 @@ class EmojiCountBot():
         self.say_in_channel(message, channel)
 
     def handle_table_flip(self, match_object, message_object):
-        message="┬{}┬ノ(ಠ_ಠノ)".format("─" * len(match_object.group(1)))
-        channel=message_object.channel
+        message = "┬{}┬ノ(ಠ_ಠノ)".format("─" * len(match_object.group(1)))
+        channel = message_object.channel
         self.say_in_channel(message, channel)
 
     def handle_score_request(self, match_object, message_object):
@@ -153,8 +144,8 @@ class EmojiCountBot():
         user_name = self.slack_client.get_user_name(user)
         score = self.emoji_counter.score(user)
         self.log.info("Score for: {}: {}".format(user_name, score))
-        message="Score for <@{}> is {}".format(user, score)
-        channel=message_object.channel
+        message = "Score for <@{}> is {}".format(user, score)
+        channel = message_object.channel
         self.say_in_channel(message, channel)
 
     def handle_upvote(self, match_object, message_object):
@@ -210,31 +201,3 @@ class EmojiCountBot():
         reaction = event["reaction"]
         ts = event["event_ts"]
         self.emoji_counter.remove_score(item_user, reaction, ts)
-
-
-def set_up_logging():
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-    color_formatter = coloredlogs.ColoredFormatter(fmt="%(asctime)s %(name)s %(levelname)s %(message)s")
-
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(color_formatter)
-    console_handler.setLevel(logging.INFO)
-
-    log_folder=(os.path.join("..","log"))
-
-    file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder,"log.txt"), maxBytes=(1024**2)/2)
-    file_handler.setLevel(logging.INFO)
-
-    warning_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder,"errors.txt"), maxBytes=(1024**2)/2)
-    warning_file_handler.setLevel(logging.WARNING)
-
-    debug_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder,"debug.txt"), maxBytes=(1024**2)/2)
-    debug_file_handler.setLevel(logging.DEBUG)
-
-    logging.basicConfig(level=logging.DEBUG, handlers=[console_handler, file_handler, warning_file_handler, debug_file_handler])
-
-if __name__ == "__main__":
-    set_up_logging()
-    EmojiCountBot().run(reset_data=False)
