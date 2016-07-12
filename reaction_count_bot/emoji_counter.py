@@ -20,8 +20,8 @@ class EmojiCounter():
         self.latest_timestamp = "0"
         self.counts = defaultdict(Counter)
 
-        self.data_file = os.path.join("..","data","data.bin")
-        self.ts_file = os.path.join("..","data","latest_ts.txt")
+        self.data_file = os.path.join("..", "data", "data.bin")
+        self.ts_file = os.path.join("..", "data", "latest_ts.txt")
 
     def prep(self, reset_data=False):
         if not reset_data:
@@ -124,7 +124,7 @@ class EmojiCounter():
             for reaction in message_object.reactions:
                 self.counts[message_object.sender_id][reaction["name"]] += reaction["count"]
         self.latest_timestamp = self.slack_client.get_latest_timestamp()
-        
+
         self.log.debug(self.counts)
         self.log.debug(str(len(unique_items)))
         self.log.info("Finished counting all reactions.")

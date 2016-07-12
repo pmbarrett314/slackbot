@@ -1,9 +1,7 @@
-import logging
-
-
 class SlackObject(object):
+
     def __init__(self, object_json, slack_client):
-        self.object_json=object_json
+        self.object_json = object_json
 
 
 class SlackUser(SlackObject):
@@ -15,6 +13,7 @@ class SlackUser(SlackObject):
     def __init__(self, object_json, slack_client):
         super().__init__(object_json, slack_client)
         self.name = object_json["name"]
+
 
 class UnknownBot():
 
@@ -31,6 +30,7 @@ class SlackChannel(SlackObject):
     def __init__(self, object_json, slack_client):
         super().__init__(object_json, slack_client)
         self.name = "#{}".format(object_json["name"])
+
 
 class SlackMPIM(SlackObject):
 
