@@ -74,10 +74,14 @@ class EmojiCounter():
         self.log.info(self.counts[item_user])
         self.latest_timestamp = event["event_ts"]
 
+    def log_votes(self):
+        self.log.info([u for u in self.upvotes.items() if len(u[1]) > 0])
+        self.log.info([d for d in self.downvotes.items() if len(d[1]) > 0])
+
     def print_data(self):
         tot = 0
         for user in self.counts:
-            self.log.info("{}: {}".format(self.slack_team.get_user(user).name, sum(self.counts[user].values())))
+            self.log.info("{}: {}".format(self.slack_client.get_user(user).name, sum(self.counts[user].values())))
             tot += sum(self.counts[user].values())
         self.log.info("\t\t\t" + str(tot))
 

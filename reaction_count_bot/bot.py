@@ -24,7 +24,6 @@ class EmojiCountBot():
     def __init__(self):
         self.log = logging.getLogger("paulbot")
 
-        
 
         self.slack_client = MySlackClient(get_api_key())
         self.should_continue_running = True
@@ -122,6 +121,10 @@ class EmojiCountBot():
         self.register_handler("\<@({})\>:? upvote :(.*):".format(self.bot_id), self.handle_upvote)
         self.register_handler("\<@({})\>:? downvote :(.*):".format(self.bot_id), self.handle_downvote)
         self.register_handler("\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot_id), self.handle_say)
+        self.register_handler("\<@({})\>:? log_votes".format(self.bot_id), self.handle_log_votes)
+
+    def handle_log_votes(self, match_object, message_object):
+        self.emoji_counter.log_votes()
 
     def say_in_channel(self, message, channel):
         self.slack_client.api_call("chat.postMessage", text=message, channel=channel, as_user=True)
