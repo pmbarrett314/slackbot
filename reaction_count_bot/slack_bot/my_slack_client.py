@@ -1,8 +1,8 @@
 from slackclient import SlackClient
 import logging
 import time
-from slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
-from slack_messages import parse_slack_message
+from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
+from slack_bot.slack_messages import parse_slack_message
 
 
 class MySlackClient(SlackClient):

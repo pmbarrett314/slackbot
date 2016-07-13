@@ -1,5 +1,5 @@
-from bot import BotPlugin
-from slack_messages import parse_slack_message
+from slack_bot.bot_plugin import BotPlugin
+from slack_bot.slack_messages import parse_slack_message
 from collections import defaultdict
 
 

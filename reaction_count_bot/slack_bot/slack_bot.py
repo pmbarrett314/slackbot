@@ -1,6 +1,6 @@
 import re
 import time
-from my_slack_client import MySlackClient
+from slack_bot.my_slack_client import MySlackClient
 import logging
 import logging.handlers
 import signal
@@ -97,13 +97,3 @@ class Bot():
         self.say_in_channel(message, channel)
 
 
-class BotPlugin(object):
-
-    def get_rtm_handlers(self):
-        return []
-
-    def get_startup_handlers(self):
-        return []
-
-    def get_exit_handlers(self):
-        return []

@@ -1,6 +1,6 @@
-from message_handler import MessageHandler
+from slack_bot.message_handler import MessageHandler
 import logging
-from emoji_counter import EmojiCounter
+from reaction_count.reaction_counter import EmojiCounter
 
 
 class ReactionCountBot(MessageHandler):

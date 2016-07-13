@@ -1,8 +1,8 @@
 import logging
 import os
-from reaction_count_bot import ReactionCountBot
-from default_log_handler import DefaultLogHandler
-from bot import Bot
+from reaction_count.reaction_count_bot import ReactionCountBot
+from slack_bot.default_log_handler import DefaultLogHandler
+from slack_bot.slack_bot import Bot
 import coloredlogs
 
 def get_api_key():

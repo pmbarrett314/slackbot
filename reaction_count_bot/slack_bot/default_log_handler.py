@@ -1,4 +1,4 @@
-from bot import BotPlugin
+from slack_bot.bot_plugin import BotPlugin
 
 
 class DefaultLogHandler(BotPlugin):
