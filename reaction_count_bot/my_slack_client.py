@@ -1,5 +1,4 @@
 from slackclient import SlackClient
-from bidict import bidict
 import logging
 import time
 from slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
@@ -13,11 +12,11 @@ class MySlackClient(SlackClient):
 
         self.log = logging.getLogger("my_slack_client")
 
-        self.users = bidict()
-        self.channels = bidict()
-        self.dms = bidict()
-        self.groups = bidict()
-        self.mpims = bidict()
+        self.users = dict()
+        self.channels = dict()
+        self.dms = dict()
+        self.groups = dict()
+        self.mpims = dict()
 
     def connect(self):
         if not self.rtm_connect():
@@ -41,7 +40,7 @@ class MySlackClient(SlackClient):
         if not resp["ok"]:
             raise Exception("Unable to call {}".format(slack_class.slack_api_method))
 
-        return_dict = bidict()
+        return_dict = dict()
         for item in resp[slack_class.response_list_key]:
             return_dict[item["id"]] = slack_class(item, self)
         self.log.info("Done Fetching {}s.".format(slack_class.slack_class_name))
