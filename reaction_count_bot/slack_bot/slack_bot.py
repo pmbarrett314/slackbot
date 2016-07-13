@@ -1,4 +1,3 @@
-import re
 import time
 from slack_bot.my_slack_client import MySlackClient
 import logging
@@ -6,9 +5,6 @@ import logging.handlers
 import signal
 import sys
 from collections import defaultdict
-
-BOT_NAME = 'paulbot'
-
 
 class Bot():
 
@@ -42,8 +38,11 @@ class Bot():
             handler()
         sys.exit(0)
 
-    def run(self):
+    def set_up_exit(self):
         signal.signal(signal.SIGINT, self.exit_handler)
+
+    def run(self):
+        self.set_up_exit()
 
         self.slack_client.connect()
         self.test_auth()
@@ -95,5 +94,3 @@ class Bot():
     def dm(self, message, user):
         channel = self.slack_client.get_dm_for_user(user)
         self.say_in_channel(message, channel)
-
-
