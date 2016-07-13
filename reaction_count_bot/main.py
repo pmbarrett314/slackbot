@@ -21,13 +21,13 @@ def set_up_logging():
 
     log_folder = (os.path.join("..", "log"))
 
-    file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "log.txt"), maxBytes=(1024**2) / 2)
+    file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "log.txt"), maxBytes=(1024**2) / 2, backupCount=1)
     file_handler.setLevel(logging.INFO)
 
-    warning_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "errors.txt"), maxBytes=(1024**2) / 2)
+    warning_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "errors.txt"), maxBytes=(1024**2) / 2, backupCount=1)
     warning_file_handler.setLevel(logging.WARNING)
 
-    debug_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "debug.txt"), maxBytes=(1024**2) / 2)
+    debug_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_folder, "debug.txt"), maxBytes=(1024**2) / 2, backupCount=1)
     debug_file_handler.setLevel(logging.DEBUG)
 
     logging.basicConfig(level=logging.DEBUG, handlers=[console_handler, file_handler, warning_file_handler, debug_file_handler])
