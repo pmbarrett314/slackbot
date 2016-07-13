@@ -92,7 +92,9 @@ class Bot():
     def say_in_channel(self, message, channel):
         self.slack_client.api_call("chat.postMessage", text=message, channel=channel, as_user=True)
 
-
+    def dm(self, message, user):
+        channel = self.slack_client.get_dm_for_user(user)
+        self.say_in_channel(message, channel)
 
 
 class BotPlugin(object):

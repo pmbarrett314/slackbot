@@ -15,6 +15,7 @@ class MySlackClient(SlackClient):
         self.users = dict()
         self.channels = dict()
         self.dms = dict()
+        self.dms_by_user = dict()
         self.groups = dict()
         self.mpims = dict()
 
@@ -71,6 +72,13 @@ class MySlackClient(SlackClient):
 
     def update_dms(self):
         self.dms = self.fetch_updated_list(SlackDM)
+        self.dms_by_user = self.update_dms_by_user()
+
+    def update_dms_by_user(self):
+        dms_by_user = dict()
+        for dm in self.dms.values():
+            dms_by_user[dm.user] = dm
+        return dms_by_user
 
     def get_users(self):
         self.update_users()
@@ -104,6 +112,25 @@ class MySlackClient(SlackClient):
 
     def get_dm(self, dm_id):
         return self.get_object(dm_id, self.update_dms, self.dms)
+
+    def get_dm_for_user(self, user_id):
+        try: 
+            return self.dms_by_user[user_id]
+        except KeyError:
+            self.update_dms()
+            try: 
+                return self.dms_by_user[user_id]
+            except KeyError:
+                dm_id = self.open_dm_to_user(user_id)
+                self.update_dms()
+                return dm_id
+
+    def open_dm_to_user(self, user_id):
+        resp = self.api_call("im.open", user=user_id)
+        if not resp["ok"]:
+            raise Exception(str(resp))
+        else:
+            return resp["channel"]["id"]
 
     def get_user_name(self, user_id):
         return self.get_user(user_id).name
@@ -173,6 +200,8 @@ class MySlackClient(SlackClient):
             message_object = None
             if item["type"] == "message":
                 message = item["message"]
+                if "channel" not in message:
+                    message["channel"]=None
                 message_object = parse_slack_message(message)
             if message_object is not None:
                 unique_items.add(message_object)

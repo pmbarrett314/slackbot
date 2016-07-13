@@ -15,6 +15,7 @@ class SlackUser(SlackObject):
         self.name = object_json["name"]
 
 
+
 class UnknownBot():
 
     def __init__(self):
@@ -65,3 +66,4 @@ class SlackDM(SlackObject):
         self.user = slack_client.get_user(object_json["user"])
         self.user_name = self.user.name
         self.name = "DM with {}".format(self.user_name)
+        self.id = object_json["id"]
