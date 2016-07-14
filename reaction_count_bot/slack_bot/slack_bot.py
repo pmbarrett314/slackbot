@@ -27,8 +27,10 @@ class Bot():
     def register_plugin(self, plugin):
         for handler in plugin.get_startup_handlers():
             self.startup_handlers.append(handler)
-        for handler in plugin.get_rtm_handlers():
-            self.rtm_event_handlers[handler[0]].append(handler[1])
+
+        rtm_handlers = plugin.get_rtm_handlers()
+        for message_type in rtm_handlers:
+            self.rtm_event_handlers[message_type].extend(rtm_handlers[message_type])
         for handler in plugin.get_exit_handlers():
             self.exit_handlers.append(handler)
 

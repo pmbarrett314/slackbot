@@ -8,9 +8,9 @@ class DefaultLogHandler(BotPlugin):
 
     def get_rtm_handlers(self):
         event_handlers = super().get_rtm_handlers()
-        event_handlers.append(("reconnect_url", self.on_reconnect))
-        event_handlers.append(("presence_change", self.on_presence_change))
-        event_handlers.append(("user_typing", self.on_user_typing))
+        event_handlers["reconnect_url"].append(self.on_reconnect)
+        event_handlers["presence_change"].append(self.on_presence_change)
+        event_handlers["user_typing"].append(self.on_user_typing)
         return event_handlers
 
     def on_reconnect(self, event):

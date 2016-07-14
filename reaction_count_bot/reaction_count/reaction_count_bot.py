@@ -14,8 +14,8 @@ class ReactionCountBot(MessageHandler):
 
     def get_rtm_handlers(self):
         event_handlers = super().get_rtm_handlers()
-        event_handlers.append(("reaction_added", self.on_reaction_added))
-        event_handlers.append(("reaction_removed", self.on_reaction_removed))
+        event_handlers["reaction_added"].append(self.on_reaction_added)
+        event_handlers["reaction_removed"].append(self.on_reaction_removed)
         return event_handlers
 
     def get_startup_handlers(self):

@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 class BotPlugin(object):
 
     def get_rtm_handlers(self):
-        return []
+        return defaultdict(list)
 
     def get_startup_handlers(self):
         return []

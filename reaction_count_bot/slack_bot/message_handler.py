@@ -12,10 +12,9 @@ class MessageHandler(BotPlugin):
         self.log = logging.getLogger("MessageHandler")
         self.bot = bot
 
-
     def get_rtm_handlers(self):
-        event_handlers = []
-        event_handlers.append(("message", self.handle_message))
+        event_handlers = super().get_rtm_handlers()
+        event_handlers["message"].append(self.handle_message)
         return event_handlers
 
     def get_message_handlers(self):

@@ -77,6 +77,8 @@ class MySlackClient(SlackClient):
     def update_dms_by_user(self):
         dms_by_user = dict()
         for dm in self.dms.values():
+            if dm.user in dms_by_user:
+                self.log.warning("{} already in dms by user".format(self.get_user_name(dm.user)))
             dms_by_user[dm.user] = dm
         return dms_by_user
 
@@ -114,11 +116,11 @@ class MySlackClient(SlackClient):
         return self.get_object(dm_id, self.update_dms, self.dms)
 
     def get_dm_for_user(self, user_id):
-        try: 
+        try:
             return self.dms_by_user[user_id]
         except KeyError:
             self.update_dms()
-            try: 
+            try:
                 return self.dms_by_user[user_id]
             except KeyError:
                 dm_id = self.open_dm_to_user(user_id)
