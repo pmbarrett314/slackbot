@@ -36,11 +36,14 @@ def set_up_logging():
 if __name__ == "__main__":
     set_up_logging()
     bot = Bot(get_api_key())
+
+    default_handler = DefaultLogHandler(bot)
+    bot.register_plugin(default_handler)
+
     plugin = ReactionCountBot(bot, reset_data=False)
-    plugin2 = DefaultLogHandler(bot)
     roller = Roller(bot)
+    
     bot.register_plugin(plugin)
-    bot.register_plugin(plugin2)
     bot.register_plugin(roller)
 
     bot.run()

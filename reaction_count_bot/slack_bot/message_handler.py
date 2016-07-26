@@ -20,9 +20,8 @@ class MessageHandler(BotPlugin):
     def get_message_handlers(self):
         return defaultdict(list)
 
-    def handle_message(self, msg):
-        self.log.debug("on_message: {}".format(msg))
-        message_object = parse_slack_message(msg)
+    def handle_message(self, event):
+        message_object = parse_slack_message(event)
         if message_object is not None and message_object.has_text:
             for pattern in self.get_message_handlers():
                 match_object = re.search(pattern, message_object.text)

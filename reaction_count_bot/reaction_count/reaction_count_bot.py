@@ -162,8 +162,6 @@ class ReactionCountBot(MessageHandler):
         self.emoji_counter.log_votes()
 
     def on_reaction_added(self, event):
-        self.log.debug(event)
-
         if "item_user" in event:
             item_user = event["item_user"]
         else:
@@ -178,8 +176,6 @@ class ReactionCountBot(MessageHandler):
         self.emoji_counter.add_score(item_user, reaction, ts)
 
     def on_reaction_removed(self, event):
-        self.log.debug(event)
-
         if "item_user" in event:
             item_user = event["item_user"]
         else:

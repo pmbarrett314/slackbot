@@ -13,6 +13,8 @@ class DefaultLogHandler(BotPlugin):
         event_handlers["presence_change"].append(self.on_presence_change)
         event_handlers["user_typing"].append(self.on_user_typing)
         event_handlers["message"].append(self.on_message)
+        event_handlers["reaction_added"].append(self.on_reaction_added)
+        event_handlers["reaction_removed"].append(self.on_reaction_removed)
         return event_handlers
 
     def on_reconnect(self, event):
@@ -30,9 +32,17 @@ class DefaultLogHandler(BotPlugin):
         self.bot.log.debug("User {} ({}) is typing in {} ({})...".format(user_name, event["user"], channel_name, event["channel"]))
 
     def on_message(self, event):
+        self.bot.log.debug("on_message: {}".format(event))
+
         message_object = parse_slack_message(event)
 
         user_name = self.bot.slack_client.get_user_name(message_object.sender_id)
         channel_name = self.bot.slack_client.get_channel_name(message_object.channel)
         text = message_object.text
         self.bot.log.info("({}) {}: {}".format(channel_name, user_name, text))
+
+    def on_reaction_added(self, event):
+        self.log.debug("on_reaction_added: {}".format(event))
+
+    def on_reaction_removed(self, event):
+        self.log.debug("on_reaction_removed: {}".format(event))
