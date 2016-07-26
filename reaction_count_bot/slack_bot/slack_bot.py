@@ -90,9 +90,18 @@ class Bot():
         else:
             self.log.warning("{}".format(str(event)))
 
-    def say_in_channel(self, message, channel):
+    def say_in_channel(self, message, channel, log=True):
+        if log:
+            channel_name = self.slack_client.get_channel_name(channel)
+            self.log.info('Said "{}" in {} ({})'.format(message, channel_name, channel))
         self.slack_client.api_call("chat.postMessage", text=message, channel=channel, as_user=True)
 
-    def dm(self, message, user):
+    def dm(self, message, user, log=True):
         channel = self.slack_client.get_dm_for_user(user)
-        self.say_in_channel(message, channel)
+        
+        if log:
+            user_name = self.slack_client.get_user_name(user)
+
+            self.log.info('DMed {} to {} ({}), channel: {}'.format(message, user_name, user, channel))
+        
+        self.say_in_channel(message, channel, log=False)

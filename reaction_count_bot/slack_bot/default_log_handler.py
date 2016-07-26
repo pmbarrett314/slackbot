@@ -35,8 +35,10 @@ class DefaultLogHandler(BotPlugin):
         self.bot.log.debug("on_message: {}".format(event))
 
         message_object = parse_slack_message(event)
-
-        user_name = self.bot.slack_client.get_user_name(message_object.sender_id)
+        sender = message_object.sender_id
+        if sender == self.bot.bot_id:
+            return
+        user_name = self.bot.slack_client.get_user_name(sender)
         channel_name = self.bot.slack_client.get_channel_name(message_object.channel)
         text = message_object.text
         self.bot.log.info("({}) {}: {}".format(channel_name, user_name, text))
