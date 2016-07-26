@@ -42,7 +42,7 @@ class DefaultLogHandler(BotPlugin):
         self.bot.log.info("({}) {}: {}".format(channel_name, user_name, text))
 
     def on_reaction_added(self, event):
-        self.log.debug("on_reaction_added: {}".format(event))
+        self.bot.log.debug("on_reaction_added: {}".format(event))
 
     def on_reaction_removed(self, event):
-        self.log.debug("on_reaction_removed: {}".format(event))
+        self.bot.log.debug("on_reaction_removed: {}".format(event))
