@@ -2,6 +2,7 @@ import time
 from slack_bot.my_slack_client import MySlackClient
 import logging
 import logging.handlers
+import pprint
 import signal
 import sys
 from collections import defaultdict
@@ -88,7 +89,7 @@ class Bot():
             for handler in self.rtm_event_handlers[event_type]:
                 handler(event)
         else:
-            self.log.warning("{}".format(str(event)))
+            self.log.warning("{}".format(pprint.pformat(event)))
 
     def say_in_channel(self, message, channel, log=True):
         if log:
