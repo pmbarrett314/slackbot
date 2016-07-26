@@ -29,7 +29,3 @@ class MessageHandler(BotPlugin):
                 if match_object is not None:
                     for handler in self.get_message_handlers()[pattern]:
                         handler(match_object, message_object)
-            user_name = self.bot.slack_client.get_user_name(message_object.sender_id)
-            channel_name = self.bot.slack_client.get_channel_name(message_object.channel)
-            text = message_object.text
-            self.log.info("({}) {}: {}".format(channel_name, user_name, text))
