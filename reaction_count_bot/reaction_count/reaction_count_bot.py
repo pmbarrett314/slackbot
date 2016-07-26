@@ -48,8 +48,18 @@ class ReactionCountBot(MessageHandler):
         message_handlers["\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot.bot_id)].append(self.handle_say)
         message_handlers["\<@({})\>:? dm \"(.*)\" to \<@(.*)\>".format(self.bot.bot_id)].append(self.handle_dm)
         message_handlers["\<@({})\>:? tally :(.*):".format(self.bot.bot_id)].append(self.handle_tally)
+        message_handlers["\<@({})\>:? help".format(self.bot.bot_id)].append(self.help)
 
         return message_handlers
+
+    def help(self, match_object, message_object):
+        sender = message_object.sender_id
+        commands = ["score (me, all, @<user_name>)", "(up, down)vote :<reaction>:", "list [detailed] votes", "tally :<reaction>:", "roll <number>d<number>"]
+        message = "I can speak in #bot and DM, so don't spam main with me.\nCommands ('()': choose one, '[]': optional, <>: replace with what's described):\n"
+        for command in commands:
+            message+=("\t{}\n".format(command))
+
+        self.bot.dm(message, sender)
 
     def handle_tally(self, match_object, message_object):
         reaction = match_object.group(2)
@@ -120,8 +130,6 @@ class ReactionCountBot(MessageHandler):
             message += "\t{}: {}\n".format(self.bot.slack_client.get_user_name(score[0]), score[1])
         user = message_object.sender_id
         self.bot.dm(message, user)
-
-      
 
     def handle_upvote(self, match_object, message_object):
         user = message_object.sender_id
