@@ -82,7 +82,7 @@ class Bot():
             raise Exception("auth.test returned error: {}".format(resp))
 
     def process(self, event):
-        self.log.debug("process: {}".format(event))
+        self.log.debug("process: {}".format(pprint.pformat(event)))
         event_type = event["type"]
 
         if self.rtm_event_handlers[event_type]:
