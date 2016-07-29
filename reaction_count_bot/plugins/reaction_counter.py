@@ -57,22 +57,15 @@ class EmojiCounter():
 
     def add_score(self, item_user, reaction, timestamp):
         self.counts[item_user][reaction] += 1
-        self.log.info("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
+        self.log.info("{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction], reaction))
+        self.log.debug("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
         self.latest_timestamp = timestamp
 
     def remove_score(self, item_user, reaction, timestamp):
-        self.counts[item_user][reaction] += 1
-        self.log.info("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
-        self.latest_timestamp = timestamp
-
-    def handle_reaction_removed(self, event):
-        self.log.info(event)
-
-        item_user = event["item_user"]
-        reaction = event["reaction"]
         self.counts[item_user][reaction] -= 1
-        self.log.info(self.counts[item_user])
-        self.latest_timestamp = event["event_ts"]
+        self.log.info("{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction], reaction))
+        self.log.debug("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
+        self.latest_timestamp = timestamp
 
     def log_votes(self):
         self.log.info([u for u in self.upvotes.items() if len(u[1]) > 0])

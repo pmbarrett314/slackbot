@@ -1,9 +1,9 @@
 from slackclient import SlackClient
-from bidict import bidict
 import logging
 import time
-from slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
-from slack_messages import parse_slack_message
+import pprint
+from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
+from slack_bot.slack_messages import parse_slack_message, NoChannelException
 
 
 class MySlackClient(SlackClient):
@@ -13,11 +13,20 @@ class MySlackClient(SlackClient):
 
         self.log = logging.getLogger("my_slack_client")
 
-        self.users = bidict()
-        self.channels = bidict()
-        self.dms = bidict()
-        self.groups = bidict()
-        self.mpims = bidict()
+        self.users = dict()
+        self.channels = dict()
+        self.dms = dict()
+        self.dms_by_user = dict()
+        self.groups = dict()
+        self.mpims = dict()
+
+    def api_call(self, *args, **kwargs):
+        response = super().api_call(*args, **kwargs)
+        if "ok" in response and response["ok"]:
+            self.log.debug(pprint.pformat(response))
+        else:
+            self.log.warning(pprint.pformat(response))
+        return response
 
     def connect(self):
         if not self.rtm_connect():
@@ -41,7 +50,7 @@ class MySlackClient(SlackClient):
         if not resp["ok"]:
             raise Exception("Unable to call {}".format(slack_class.slack_api_method))
 
-        return_dict = bidict()
+        return_dict = dict()
         for item in resp[slack_class.response_list_key]:
             return_dict[item["id"]] = slack_class(item, self)
         self.log.info("Done Fetching {}s.".format(slack_class.slack_class_name))
@@ -72,6 +81,15 @@ class MySlackClient(SlackClient):
 
     def update_dms(self):
         self.dms = self.fetch_updated_list(SlackDM)
+        self.dms_by_user = self.update_dms_by_user()
+
+    def update_dms_by_user(self):
+        dms_by_user = dict()
+        for dm in self.dms.values():
+            if dm.user in dms_by_user:
+                self.log.warning("{} already in dms by user".format(self.get_user_name(dm.user)))
+            dms_by_user[dm.user] = dm
+        return dms_by_user
 
     def get_users(self):
         self.update_users()
@@ -105,6 +123,25 @@ class MySlackClient(SlackClient):
 
     def get_dm(self, dm_id):
         return self.get_object(dm_id, self.update_dms, self.dms)
+
+    def get_dm_for_user(self, user_id):
+        try:
+            return self.dms_by_user[user_id]
+        except KeyError:
+            self.update_dms()
+            try:
+                return self.dms_by_user[user_id]
+            except KeyError:
+                dm_id = self.open_dm_to_user(user_id)
+                self.update_dms()
+                return dm_id
+
+    def open_dm_to_user(self, user_id):
+        resp = self.api_call("im.open", user=user_id)
+        if not resp["ok"]:
+            raise Exception(str(resp))
+        else:
+            return resp["channel"]["id"]
 
     def get_user_name(self, user_id):
         return self.get_user(user_id).name
@@ -149,7 +186,10 @@ class MySlackClient(SlackClient):
                     messages.extend(resp["messages"])
         for message in messages:
             if not only_reacted_to or "reactions" in message:
-                message_object = parse_slack_message(message)
+                try:
+                    message_object = parse_slack_message(message)
+                except NoChannelException:
+                    continue
                 if message_object is not None:
                     message_objects.append(message_object)
         return message_objects
@@ -174,6 +214,8 @@ class MySlackClient(SlackClient):
             message_object = None
             if item["type"] == "message":
                 message = item["message"]
+                if "channel" not in message:
+                    message["channel"] = None
                 message_object = parse_slack_message(message)
             if message_object is not None:
                 unique_items.add(message_object)

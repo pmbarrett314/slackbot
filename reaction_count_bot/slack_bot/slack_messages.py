@@ -24,14 +24,18 @@ def parse_slack_message(message_json):
             message_object = FileShare(message_json)
         elif message_json["subtype"] == "message_changed":
             message_object = MessageChanged(message_json)
+        elif message_json["subtype"] == "message_deleted":
+            message_object = MessageDeleted(message_json)
         else:
-            log.warn(message_json)
+            log.warn(pprint.pformat(message_json))
     elif "user" in message_json:
         message_object = OrdinaryMessage(message_json)
     else:
         log.warn(message_json)
     return message_object
 
+class NoChannelException(Exception):
+    pass
 
 class SlackMessage(object):
 
@@ -55,7 +59,7 @@ class SlackMessage(object):
         if "channel" in message_json:
             self.channel = message_json["channel"]
         else:
-            raise Exception("Message has no channel {}".format(pprint.pformat(message_json)))
+            raise NoChannelException("Message has no channel {}".format(pprint.pformat(message_json)))
 
         self.message_json = message_json
         if "user" in message_json:
@@ -108,7 +112,22 @@ class FileShare(SlackMessage):
     pass
 
 
+class MessageDeleted(SlackMessage):
+    def __init__(self, message_json):
+        if "previous_message" in message_json and "text" in message_json["previous_message"]:
+            message_json["text"] = message_json["previous_message"]["text"]
+        else:
+            message_json["text"] = None
+
+        if "previous_message" in message_json and "user" in message_json["previous_message"]:
+            message_json["user"] = message_json["previous_message"]["user"]
+        else:
+            message_json["user"] = None
+        super().__init__(message_json)
+
+
 class MessageChanged(SlackMessage):
+
     def __init__(self, message_json):
         message_json["text"] = None
         if "edited" in message_json["message"]:
@@ -116,4 +135,3 @@ class MessageChanged(SlackMessage):
         else:
             message_json["user"] = message_json["message"]["user"]
         super().__init__(message_json)
-
