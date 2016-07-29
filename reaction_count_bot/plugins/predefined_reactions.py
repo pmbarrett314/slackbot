@@ -16,6 +16,5 @@ class PredefinedReactions(MessageHandler):
         channel = message_object.channel
         sender = message_object.sender_id
         timestamp = message_object.timestamp
-        print(self.giphy_reactions)
         if sender in self.giphy_reactions:
             self.bot.add_reaction_to_message(self.giphy_reactions[sender], channel, timestamp)
