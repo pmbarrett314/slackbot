@@ -1,6 +1,7 @@
 from slackclient import SlackClient
 import logging
 import time
+import pprint
 from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
 from slack_bot.slack_messages import parse_slack_message
 
@@ -18,6 +19,15 @@ class MySlackClient(SlackClient):
         self.dms_by_user = dict()
         self.groups = dict()
         self.mpims = dict()
+
+
+    def api_call(self, *args, **kwargs):
+        response = super().api_call(*args, **kwargs)
+        if "ok" in response and response["ok"]:
+            self.log.debug(pprint.pformat(response))
+        else:
+            self.log.warning(pprint.pformat(response))
+        return response
 
     def connect(self):
         if not self.rtm_connect():
