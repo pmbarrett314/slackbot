@@ -1,4 +1,4 @@
-from slack_bot.message_handler import MessageHandler
+from plugins.message_handler import MessageHandler
 import random
 
 
