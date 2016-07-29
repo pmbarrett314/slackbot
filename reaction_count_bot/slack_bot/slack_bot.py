@@ -22,7 +22,7 @@ class Bot():
         self.team_id = None
         self.url = None
 
-        self.startup_handlers = []
+        self.startup_handlers = set()
         self.rtm_event_handlers = defaultdict(list)
         self.exit_handlers = []
 
@@ -36,10 +36,19 @@ class Bot():
         for handler in plugin.get_exit_handlers():
             self.exit_handlers.append(handler)
 
+    def new_register_plugin(self, plugin):
+        if plugin.get_startup_handlers():
+            self.startup_handlers.add(plugin)
+        for event in plugin.get_rtm_handlers():
+            self.rtm_event_handlers[event].add(plugin)
+        if plugin.get_exit_handlers():
+            self.exit_handlers.add(plugin)
+
     def exit_handler(self, signal, frame):
         self.log.warning("\nExiting...")
-        for handler in self.exit_handlers:
-            handler()
+        for plugin in self.exit_handlers:
+            for handler_method in plugin.get_exit_handlers()
+                handler_method()
         sys.exit(0)
 
     def set_up_exit(self):
