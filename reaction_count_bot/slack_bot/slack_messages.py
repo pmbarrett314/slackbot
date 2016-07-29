@@ -25,7 +25,7 @@ def parse_slack_message(message_json):
         elif message_json["subtype"] == "message_changed":
             message_object = MessageChanged(message_json)
         else:
-            log.warn(message_json)
+            log.warn(pprint.pformat(message_json))
     elif "user" in message_json:
         message_object = OrdinaryMessage(message_json)
     else:
@@ -109,6 +109,7 @@ class FileShare(SlackMessage):
 
 
 class MessageChanged(SlackMessage):
+
     def __init__(self, message_json):
         message_json["text"] = None
         if "edited" in message_json["message"]:
@@ -116,4 +117,3 @@ class MessageChanged(SlackMessage):
         else:
             message_json["user"] = message_json["message"]["user"]
         super().__init__(message_json)
-
