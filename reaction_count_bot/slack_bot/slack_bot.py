@@ -106,3 +106,6 @@ class Bot():
             self.log.info('DMed {} to {} ({}), channel: {}'.format(message, user_name, user, channel))
         
         self.say_in_channel(message, channel, log=False)
+
+    def add_reaction_to_message(self, reaction, channel, timestamp):
+        return self.slack_client.api_call("reactions.add", name= reaction, channel=channel, timestamp=timestamp)
