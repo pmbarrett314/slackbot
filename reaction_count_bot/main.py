@@ -16,8 +16,7 @@ def get_predefined_reactions():
     reactions = dict()
     with open(os.path.join("..", "private", "predefined_reactions.txt"), "r") as reaction_file:
         for line in reaction_file:
-            print(line)
-            user_id, reaction = line.split(":")
+            user_id, reaction = line.strip().split(":")
             reactions[user_id] = reaction
     return reactions
 

@@ -3,7 +3,7 @@ import logging
 import time
 import pprint
 from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
-from slack_bot.slack_messages import parse_slack_message
+from slack_bot.slack_messages import parse_slack_message, NoChannelException
 
 
 class MySlackClient(SlackClient):
@@ -19,7 +19,6 @@ class MySlackClient(SlackClient):
         self.dms_by_user = dict()
         self.groups = dict()
         self.mpims = dict()
-
 
     def api_call(self, *args, **kwargs):
         response = super().api_call(*args, **kwargs)
@@ -187,7 +186,10 @@ class MySlackClient(SlackClient):
                     messages.extend(resp["messages"])
         for message in messages:
             if not only_reacted_to or "reactions" in message:
-                message_object = parse_slack_message(message)
+                try:
+                    message_object = parse_slack_message(message)
+                except NoChannelException:
+                    continue
                 if message_object is not None:
                     message_objects.append(message_object)
         return message_objects
@@ -213,7 +215,7 @@ class MySlackClient(SlackClient):
             if item["type"] == "message":
                 message = item["message"]
                 if "channel" not in message:
-                    message["channel"]=None
+                    message["channel"] = None
                 message_object = parse_slack_message(message)
             if message_object is not None:
                 unique_items.add(message_object)
