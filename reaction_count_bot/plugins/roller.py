@@ -22,12 +22,10 @@ class Roller(MessageHandler):
         if not die_size > 0:
             self.bot.dm("no", sender)
 
-
         for _ in range(number_of_dice):
             rolls.append(random.randint(1, die_size))
         score = sum(rolls)
         message = "{}: {}".format(rolls, score)
-
 
         if len(message) > 100000:
             if len(str(score)) < 100000:
@@ -39,6 +37,5 @@ class Roller(MessageHandler):
             if len(str(score)) < 1000:
                 self.bot.say_in_channel("Total: {}".format(str(score)), channel)
             return
-
 
         self.bot.say_in_channel(message, channel)

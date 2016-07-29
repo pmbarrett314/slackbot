@@ -7,6 +7,7 @@ import signal
 import sys
 from collections import defaultdict
 
+
 class Bot():
 
     def __init__(self, apikey):
@@ -99,13 +100,13 @@ class Bot():
 
     def dm(self, message, user, log=True):
         channel = self.slack_client.get_dm_for_user(user)
-        
+
         if log:
             user_name = self.slack_client.get_user_name(user)
 
             self.log.info('DMed {} to {} ({}), channel: {}'.format(message, user_name, user, channel))
-        
+
         self.say_in_channel(message, channel, log=False)
 
     def add_reaction_to_message(self, reaction, channel, timestamp):
-        return self.slack_client.api_call("reactions.add", name= reaction, channel=channel, timestamp=timestamp)
+        return self.slack_client.api_call("reactions.add", name=reaction, channel=channel, timestamp=timestamp)
