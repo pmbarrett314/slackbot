@@ -1,15 +1,15 @@
-import time
-from slack_bot.my_slack_client import MySlackClient
 import logging
 import logging.handlers
 import pprint
 import signal
 import sys
+import time
 from collections import defaultdict
+
+from slack_bot.my_slack_client import MySlackClient
 
 
 class Bot():
-
     def __init__(self, apikey):
         self.log = logging.getLogger("paulbot")
 

@@ -1,10 +1,10 @@
+import pprint
+
 from slack_bot.bot_plugin import BotPlugin
 from slack_bot.slack_messages import parse_slack_message
-import pprint
 
 
 class DefaultLogHandler(BotPlugin):
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -30,7 +30,8 @@ class DefaultLogHandler(BotPlugin):
         self.bot.log.debug("on_user_typing: {}".format(pprint.pformat(event)))
         user_name = self.bot.slack_client.get_user_name(event["user"])
         channel_name = self.bot.slack_client.get_channel_name(event["channel"])
-        self.bot.log.debug("User {} ({}) is typing in {} ({})...".format(user_name, event["user"], channel_name, event["channel"]))
+        self.bot.log.debug(
+            "User {} ({}) is typing in {} ({})...".format(user_name, event["user"], channel_name, event["channel"]))
 
     def on_message(self, event):
         self.bot.log.debug("on_message: {}".format(pprint.pformat(event)))

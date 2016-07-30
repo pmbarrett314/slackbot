@@ -34,11 +34,12 @@ def parse_slack_message(message_json):
         log.warn(message_json)
     return message_object
 
+
 class NoChannelException(Exception):
     pass
 
-class SlackMessage(object):
 
+class SlackMessage(object):
     def __init__(self, message_json):
         self.timestamp = message_json["ts"]
         if "reactions" in message_json:
@@ -72,7 +73,6 @@ class SlackMessage(object):
 
 
 class BotMessage(SlackMessage):
-
     def __init__(self, message_json):
         message_json["user"] = message_json["bot_id"]
         self.bot_id = message_json["bot_id"]
@@ -127,7 +127,6 @@ class MessageDeleted(SlackMessage):
 
 
 class MessageChanged(SlackMessage):
-
     def __init__(self, message_json):
         message_json["text"] = None
         if "edited" in message_json["message"]:

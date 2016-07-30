@@ -2,7 +2,6 @@ from plugins.message_handler import MessageHandler
 
 
 class PredefinedReactions(MessageHandler):
-
     def __init__(self, bot):
         super().__init__(bot)
         self.giphy_reactions = dict()

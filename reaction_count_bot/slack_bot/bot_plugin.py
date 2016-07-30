@@ -2,7 +2,6 @@ from collections import defaultdict
 
 
 class BotPlugin(object):
-
     def __init__(self):
         self.startup_handlers = set()
         self.rtm_handlers = defaultdict(set)

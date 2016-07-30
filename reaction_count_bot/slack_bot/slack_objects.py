@@ -1,11 +1,9 @@
 class SlackObject(object):
-
     def __init__(self, object_json, slack_client):
         self.object_json = object_json
 
 
 class SlackUser(SlackObject):
-
     slack_api_method = "users.list"
     slack_class_name = "User"
     response_list_key = "members"
@@ -15,15 +13,12 @@ class SlackUser(SlackObject):
         self.name = object_json["name"]
 
 
-
 class UnknownBot():
-
     def __init__(self):
         self.name = "Unknown_bot"
 
 
 class SlackChannel(SlackObject):
-
     slack_api_method = "channels.list"
     slack_class_name = "Channel"
     response_list_key = "channels"
@@ -34,7 +29,6 @@ class SlackChannel(SlackObject):
 
 
 class SlackMPIM(SlackObject):
-
     slack_api_method = "mpim.list"
     slack_class_name = "MPIM"
     response_list_key = "groups"
@@ -45,7 +39,6 @@ class SlackMPIM(SlackObject):
 
 
 class SlackGroup(SlackObject):
-
     slack_api_method = "groups.list"
     slack_class_name = "Group"
     response_list_key = "groups"
@@ -56,7 +49,6 @@ class SlackGroup(SlackObject):
 
 
 class SlackDM(SlackObject):
-
     slack_api_method = "im.list"
     slack_class_name = "DM"
     response_list_key = "ims"

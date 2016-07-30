@@ -1,10 +1,10 @@
-from slack_bot.bot_plugin import BotPlugin
-from slack_bot.slack_messages import parse_slack_message
+import logging
+import re
 from collections import defaultdict
 
+from slack_bot.bot_plugin import BotPlugin
+from slack_bot.slack_messages import parse_slack_message
 
-import re
-import logging
 
 class MessageHandler(BotPlugin):
     def __init__(self, bot):
