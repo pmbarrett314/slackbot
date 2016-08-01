@@ -1,13 +1,14 @@
-from slackclient import SlackClient
 import logging
-import time
 import pprint
-from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
+import time
+
+from slackclient import SlackClient
+
 from slack_bot.slack_messages import parse_slack_message, NoChannelException
+from slack_bot.slack_objects import SlackChannel, SlackDM, SlackMPIM, SlackGroup, SlackUser, UnknownBot
 
 
 class MySlackClient(SlackClient):
-
     def __init__(self, api_key):
         super(MySlackClient, self).__init__(api_key)
 
@@ -205,7 +206,7 @@ class MySlackClient(SlackClient):
             if "paging" in resp:
                 paging = resp["paging"]
                 while paging["page"] < paging["pages"]:
-                    resp = self.api_call("reactions.list", user=user, page=paging["page"]+1)
+                    resp = self.api_call("reactions.list", user=user, page=paging["page"] + 1)
                     paging = resp["paging"]
                     items.extend(resp["items"])
             self.log.debug("{} {}".format(self.get_user(user).name, len(items)))

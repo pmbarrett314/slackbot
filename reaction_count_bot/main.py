@@ -1,11 +1,14 @@
 import logging
 import os
+
+import coloredlogs
+
+from plugins.default_log_handler import DefaultLogHandler
+from plugins.predefined_reactions import PredefinedReactions
 from plugins.reaction_count_bot import ReactionCountBot
 from plugins.roller import Roller
-from plugins.predefined_reactions import PredefinedReactions
-from plugins.default_log_handler import DefaultLogHandler
 from slack_bot.slack_bot import Bot
-import coloredlogs
+
 
 def get_api_key():
     with open(os.path.join("..", "private", ".apikey"), "r") as keyfile:

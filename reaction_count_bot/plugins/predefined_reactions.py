@@ -2,15 +2,12 @@ from plugins.message_handler import MessageHandler
 
 
 class PredefinedReactions(MessageHandler):
-
     def __init__(self, bot):
         super().__init__(bot)
+
         self.giphy_reactions = dict()
 
-    def get_message_handlers(self):
-        message_handlers = super().get_message_handlers()
-        message_handlers["/giphy.*".format(self.bot.bot_id)].append(self.handle_giphy)
-        return message_handlers
+        self.add_message_hanlder(self.handle_giphy, "/giphy.*")
 
     def handle_giphy(self, match_object, message_object):
         channel = message_object.channel

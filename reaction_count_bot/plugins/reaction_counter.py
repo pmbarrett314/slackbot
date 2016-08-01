@@ -1,11 +1,10 @@
-from collections import Counter, defaultdict
 import logging
-import pickle
 import os
+import pickle
+from collections import Counter, defaultdict
 
 
 class EmojiCounter():
-
     def __init__(self, slack_client):
         self.slack_client = slack_client
 
@@ -57,13 +56,17 @@ class EmojiCounter():
 
     def add_score(self, item_user, reaction, timestamp):
         self.counts[item_user][reaction] += 1
-        self.log.info("{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction], reaction))
+        self.log.info(
+            "{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction],
+                                      reaction))
         self.log.debug("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
         self.latest_timestamp = timestamp
 
     def remove_score(self, item_user, reaction, timestamp):
         self.counts[item_user][reaction] -= 1
-        self.log.info("{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction], reaction))
+        self.log.info(
+            "{} now has {} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user][reaction],
+                                      reaction))
         self.log.debug("{} {}".format(self.slack_client.get_user_name(item_user), self.counts[item_user]))
         self.latest_timestamp = timestamp
 
@@ -99,7 +102,8 @@ class EmojiCounter():
 
     def get_new_messages_since_offline(self):
         self.log.info("Getting new messages...")
-        message_objects = self.slack_client.get_new_messages_since_timestamp(self.latest_timestamp, only_reacted_to=True)
+        message_objects = self.slack_client.get_new_messages_since_timestamp(self.latest_timestamp,
+                                                                             only_reacted_to=True)
         for message_object in message_objects:
             for reaction in message_object.reactions:
                 self.counts[message_object.sender_id][reaction["name"]] += reaction["count"]

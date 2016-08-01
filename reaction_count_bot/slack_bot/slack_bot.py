@@ -1,15 +1,15 @@
-import time
-from slack_bot.my_slack_client import MySlackClient
 import logging
 import logging.handlers
 import pprint
 import signal
 import sys
+import time
 from collections import defaultdict
+
+from slack_bot.my_slack_client import MySlackClient
 
 
 class Bot():
-
     def __init__(self, apikey):
         self.log = logging.getLogger("paulbot")
 
@@ -22,24 +22,24 @@ class Bot():
         self.team_id = None
         self.url = None
 
-        self.startup_handlers = []
-        self.rtm_event_handlers = defaultdict(list)
-        self.exit_handlers = []
+        self.startup_handlers = set()
+        self.rtm_event_handlers = defaultdict(set)
+        self.exit_handlers = set()
+
 
     def register_plugin(self, plugin):
-        for handler in plugin.get_startup_handlers():
-            self.startup_handlers.append(handler)
-
-        rtm_handlers = plugin.get_rtm_handlers()
-        for message_type in rtm_handlers:
-            self.rtm_event_handlers[message_type].extend(rtm_handlers[message_type])
-        for handler in plugin.get_exit_handlers():
-            self.exit_handlers.append(handler)
+        if plugin.get_startup_handlers():
+            self.startup_handlers.add(plugin)
+        for event in plugin.get_rtm_handlers():
+            self.rtm_event_handlers[event].add(plugin)
+        if plugin.get_exit_handlers():
+            self.exit_handlers.add(plugin)
 
     def exit_handler(self, signal, frame):
         self.log.warning("\nExiting...")
-        for handler in self.exit_handlers:
-            handler()
+        for plugin in self.exit_handlers:
+            for handler_method in plugin.get_exit_handlers():
+                handler_method()
         sys.exit(0)
 
     def set_up_exit(self):
@@ -52,8 +52,9 @@ class Bot():
         self.test_auth()
         self.slack_client.update_all_data()
 
-        for handler in self.startup_handlers:
-            handler()
+        for plugin in self.startup_handlers:
+            for handler_method in plugin.get_startup_handlers():
+                handler_method()
 
         self.main_loop()
 
@@ -87,8 +88,9 @@ class Bot():
         event_type = event["type"]
 
         if self.rtm_event_handlers[event_type]:
-            for handler in self.rtm_event_handlers[event_type]:
-                handler(event)
+            for plugin in self.rtm_event_handlers[event_type]:
+                for handler_method in plugin.get_rtm_handlers()[event_type]:
+                    handler_method(event)
         else:
             self.log.warning("{}".format(pprint.pformat(event)))
 

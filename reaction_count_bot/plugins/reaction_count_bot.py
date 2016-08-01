@@ -1,10 +1,10 @@
-from plugins.message_handler import MessageHandler
 import logging
+
+from plugins.message_handler import MessageHandler
 from plugins.reaction_counter import EmojiCounter
 
 
 class ReactionCountBot(MessageHandler):
-
     def __init__(self, bot, reset_data=False):
         super().__init__(bot)
         self.bot = bot
@@ -12,21 +12,27 @@ class ReactionCountBot(MessageHandler):
         self.emoji_counter = EmojiCounter(self.bot.slack_client)
         self.reset_data = reset_data
 
-    def get_rtm_handlers(self):
-        event_handlers = super().get_rtm_handlers()
-        event_handlers["reaction_added"].append(self.on_reaction_added)
-        event_handlers["reaction_removed"].append(self.on_reaction_removed)
-        return event_handlers
+        self.add_rtm_handler(self.on_reaction_added, "reaction_added")
+        self.add_rtm_handler(self.on_reaction_removed, "reaction_removed")
 
-    def get_startup_handlers(self):
-        startup_handlers = []
-        startup_handlers.append(self.prep_data)
-        return startup_handlers
+        self.add_startup_handler(self.prep_data)
 
-    def get_exit_handlers(self):
-        exit_handlers = []
-        exit_handlers.append(self.dump_data)
-        return exit_handlers
+        self.add_exit_handler(self.dump_data)
+
+        self.add_message_hanlder(self.handle_score_request, "score \<@(?P<user_id>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_score_me, "score me", address=True)
+        self.add_message_hanlder(self.handle_score_all, "score all", address=True)
+        self.add_message_hanlder(self.handle_upvote, "upvote :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.handle_downvote, "downvote :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.handle_log_votes, "log_votes", address=True)
+        self.add_message_hanlder(self.handle_list_votes, "list votes", address=True)
+        self.add_message_hanlder(self.handle_list_votes_detail, "list detailed votes", address=True)
+        self.add_message_hanlder(self.handle_table_flip, "\(╯°□°\）╯︵ ┻(━*)┻")
+        self.add_message_hanlder(self.handle_say, "say \"(?P<message>.*)\" in \<#(?P<channel>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_dm, "dm \"(?P<message>.*)\" to \<@(?P<user_id>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_tally, "tally :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.help, "help", address=True)
+
 
     def prep_data(self):
         self.emoji_counter.prep(reset_data=self.reset_data)
@@ -34,49 +40,33 @@ class ReactionCountBot(MessageHandler):
     def dump_data(self):
         self.emoji_counter.dump_data()
 
-    def get_message_handlers(self):
-        message_handlers = super().get_message_handlers()
-        message_handlers["\<@({})\>:? score \<@(.*)\>".format(self.bot.bot_id)].append(self.handle_score_request)
-        message_handlers["\<@({})\>:? score me".format(self.bot.bot_id)].append(self.handle_score_me)
-        message_handlers["\<@({})\>:? score all".format(self.bot.bot_id)].append(self.handle_score_all)
-        message_handlers["\<@({})\>:? upvote :(.*):".format(self.bot.bot_id)].append(self.handle_upvote)
-        message_handlers["\<@({})\>:? downvote :(.*):".format(self.bot.bot_id)].append(self.handle_downvote)
-        message_handlers["\<@({})\>:? log_votes".format(self.bot.bot_id)].append(self.handle_log_votes)
-        message_handlers["\<@({})\>:? list votes".format(self.bot.bot_id)].append(self.handle_list_votes)
-        message_handlers["\<@({})\>:? list detailed votes".format(self.bot.bot_id)].append(self.handle_list_votes_detail)
-        message_handlers["\(╯°□°\）╯︵ ┻(━*)┻"].append(self.handle_table_flip)
-        message_handlers["\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot.bot_id)].append(self.handle_say)
-        message_handlers["\<@({})\>:? dm \"(.*)\" to \<@(.*)\>".format(self.bot.bot_id)].append(self.handle_dm)
-        message_handlers["\<@({})\>:? tally :(.*):".format(self.bot.bot_id)].append(self.handle_tally)
-        message_handlers["\<@({})\>:? help".format(self.bot.bot_id)].append(self.help)
-
-        return message_handlers
 
     def help(self, match_object, message_object):
         sender = message_object.sender_id
-        commands = ["score (me, all, @<user_name>)", "(up, down)vote :<reaction>:", "list [detailed] votes", "tally :<reaction>:", "roll <number>d<number>"]
+        commands = ["score (me, all, @<user_name>)", "(up, down)vote :<reaction>:", "list [detailed] votes",
+                    "tally :<reaction>:", "roll <number>d<number>"]
         message = "I can speak in #bot and DM, so don't spam main with me.\nCommands ('()': choose one, '[]': optional, <>: replace with what's described):\n"
         for command in commands:
-            message+=("\t{}\n".format(command))
+            message += ("\t{}\n".format(command))
 
         self.bot.dm(message, sender)
 
     def handle_tally(self, match_object, message_object):
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         ups = len(self.emoji_counter.upvotes[reaction])
         downs = len(self.emoji_counter.downvotes[reaction])
-        message = ":{}: Up: {} Down: {} Total: {}".format(reaction, ups, downs, ups-downs)
+        message = ":{}: Up: {} Down: {} Total: {}".format(reaction, ups, downs, ups - downs)
         channel = message_object.channel
 
         self.bot.say_in_channel(message, channel)
 
     def handle_list_votes(self, match_object, message_object):
         message = ""
-        message+="Up:\n"
+        message += "Up:\n"
         for u in self.emoji_counter.upvotes.items():
             if len(u[1]) > 0:
                 message += "\t:{}:: {}\n".format(u[0], len(u[1]))
-        message+="Down:\n"
+        message += "Down:\n"
         for d in self.emoji_counter.downvotes.items():
             if len(d[1]) > 0:
                 message += "\t:{}:: {}\n".format(d[0], len(d[1]))
@@ -84,14 +74,14 @@ class ReactionCountBot(MessageHandler):
 
     def handle_list_votes_detail(self, match_object, message_object):
         message = ""
-        message+="Up:\n"
+        message += "Up:\n"
         for vote in self.emoji_counter.upvotes.items():
             if len(vote[1]) > 0:
                 message += "\t:{}:: (".format(vote[0], len(vote[1]))
                 for user in vote[1]:
                     message += "<@{}> ".format(user)
                 message += ")\n"
-        message+="Down:\n"
+        message += "Down:\n"
         for vote in self.emoji_counter.downvotes.items():
             if len(vote[1]) > 0:
                 message += "\t:{}:: (".format(vote[0], len(vote[1]))
@@ -100,9 +90,8 @@ class ReactionCountBot(MessageHandler):
                 message += ")\n"
         self.bot.dm(message, message_object.sender_id)
 
-
     def handle_score_request(self, match_object, message_object):
-        user = match_object.group(2)
+        user = match_object.group("user_id")
         user_name = self.bot.slack_client.get_user_name(user)
         score = self.emoji_counter.score(user)
         self.log.info("Score for: {}: {}".format(user_name, score))
@@ -133,24 +122,24 @@ class ReactionCountBot(MessageHandler):
 
     def handle_upvote(self, match_object, message_object):
         user = message_object.sender_id
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         self.log.info("Upvote: {} {}".format(self.bot.slack_client.get_user_name(user), reaction))
         self.emoji_counter.upvote(user, reaction)
 
     def handle_downvote(self, match_object, message_object):
         user = message_object.sender_id
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         self.log.info("Downvote: {} {}".format(self.bot.slack_client.get_user_name(user), reaction))
         self.emoji_counter.downvote(user, reaction)
 
     def handle_say(self, match_object, message_object):
-        message = match_object.group(2)
-        channel = match_object.group(3)
+        message = match_object.group("message")
+        channel = match_object.group("channel")
         self.bot.say_in_channel(message, channel)
 
     def handle_dm(self, match_object, message_object):
-        message = match_object.group(2)
-        user = match_object.group(3)
+        message = match_object.group("message")
+        user = match_object.group("user_id")
         self.bot.dm(message, user)
 
     def handle_table_flip(self, match_object, message_object):
@@ -172,7 +161,9 @@ class ReactionCountBot(MessageHandler):
         ts = event["event_ts"]
         item_ts = event["item"]["ts"]
 
-        self.log.info("{} reacted to {}'s post at at {} with {}".format(self.bot.slack_client.get_user_name(user), self.bot.slack_client.get_user_name(item_user), item_ts, reaction))
+        self.log.info("{} reacted to {}'s post at at {} with {}".format(self.bot.slack_client.get_user_name(user),
+                                                                        self.bot.slack_client.get_user_name(item_user),
+                                                                        item_ts, reaction))
         self.emoji_counter.add_score(item_user, reaction, ts)
 
     def on_reaction_removed(self, event):
