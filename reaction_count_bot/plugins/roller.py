@@ -6,12 +6,12 @@ from plugins.message_handler import MessageHandler
 class Roller(MessageHandler):
     def __init__(self, bot):
         super().__init__(bot)
-        self.add_message_hanlder(self.roll_dice, "\<@({})\>:? roll (\d*)d(\d*)".format(self.bot.bot_id))
+        self.add_message_hanlder(self.roll_dice, "roll (?P<number>\d*)d(?P<size>\d*)", address=True)
 
     def roll_dice(self, match_object, message_object):
         rolls = []
-        number_of_dice = int(match_object.group(2))
-        die_size = int(match_object.group(3))
+        number_of_dice = int(match_object.group("number"))
+        die_size = int(match_object.group("size"))
         channel = message_object.channel
         sender = message_object.sender_id
 

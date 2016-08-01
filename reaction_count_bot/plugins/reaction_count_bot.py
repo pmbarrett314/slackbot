@@ -19,19 +19,19 @@ class ReactionCountBot(MessageHandler):
 
         self.add_exit_handler(self.dump_data)
 
-        self.add_message_hanlder(self.handle_score_request, "\<@({})\>:? score \<@(.*)\>".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_score_me, "\<@({})\>:? score me".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_score_all, "\<@({})\>:? score all".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_upvote, "\<@({})\>:? upvote :(.*):".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_downvote, "\<@({})\>:? downvote :(.*):".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_log_votes, "\<@({})\>:? log_votes".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_list_votes, "\<@({})\>:? list votes".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_list_votes_detail, "\<@({})\>:? list detailed votes".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_score_request, "score \<@(?P<user_id>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_score_me, "score me", address=True)
+        self.add_message_hanlder(self.handle_score_all, "score all", address=True)
+        self.add_message_hanlder(self.handle_upvote, "upvote :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.handle_downvote, "downvote :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.handle_log_votes, "log_votes", address=True)
+        self.add_message_hanlder(self.handle_list_votes, "list votes", address=True)
+        self.add_message_hanlder(self.handle_list_votes_detail, "list detailed votes", address=True)
         self.add_message_hanlder(self.handle_table_flip, "\(╯°□°\）╯︵ ┻(━*)┻")
-        self.add_message_hanlder(self.handle_say, "\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_dm, "\<@({})\>:? dm \"(.*)\" to \<@(.*)\>".format(self.bot.bot_id))
-        self.add_message_hanlder(self.handle_tally, "\<@({})\>:? tally :(.*):".format(self.bot.bot_id))
-        self.add_message_hanlder(self.help, "\<@({})\>:? help".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_say, "say \"(?P<message>.*)\" in \<#(?P<channel>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_dm, "dm \"(?P<message>.*)\" to \<@(?P<user_id>.*)\>", address=True)
+        self.add_message_hanlder(self.handle_tally, "tally :(?P<reaction>.*):", address=True)
+        self.add_message_hanlder(self.help, "help", address=True)
 
 
     def prep_data(self):
@@ -52,7 +52,7 @@ class ReactionCountBot(MessageHandler):
         self.bot.dm(message, sender)
 
     def handle_tally(self, match_object, message_object):
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         ups = len(self.emoji_counter.upvotes[reaction])
         downs = len(self.emoji_counter.downvotes[reaction])
         message = ":{}: Up: {} Down: {} Total: {}".format(reaction, ups, downs, ups - downs)
@@ -91,7 +91,7 @@ class ReactionCountBot(MessageHandler):
         self.bot.dm(message, message_object.sender_id)
 
     def handle_score_request(self, match_object, message_object):
-        user = match_object.group(2)
+        user = match_object.group("user_id")
         user_name = self.bot.slack_client.get_user_name(user)
         score = self.emoji_counter.score(user)
         self.log.info("Score for: {}: {}".format(user_name, score))
@@ -122,24 +122,24 @@ class ReactionCountBot(MessageHandler):
 
     def handle_upvote(self, match_object, message_object):
         user = message_object.sender_id
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         self.log.info("Upvote: {} {}".format(self.bot.slack_client.get_user_name(user), reaction))
         self.emoji_counter.upvote(user, reaction)
 
     def handle_downvote(self, match_object, message_object):
         user = message_object.sender_id
-        reaction = match_object.group(2)
+        reaction = match_object.group("reaction")
         self.log.info("Downvote: {} {}".format(self.bot.slack_client.get_user_name(user), reaction))
         self.emoji_counter.downvote(user, reaction)
 
     def handle_say(self, match_object, message_object):
-        message = match_object.group(2)
-        channel = match_object.group(3)
+        message = match_object.group("message")
+        channel = match_object.group("channel")
         self.bot.say_in_channel(message, channel)
 
     def handle_dm(self, match_object, message_object):
-        message = match_object.group(2)
-        user = match_object.group(3)
+        message = match_object.group("message")
+        user = match_object.group("user_id")
         self.bot.dm(message, user)
 
     def handle_table_flip(self, match_object, message_object):
