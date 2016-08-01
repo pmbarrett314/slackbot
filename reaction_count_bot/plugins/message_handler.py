@@ -8,21 +8,20 @@ from slack_bot.slack_messages import parse_slack_message
 
 class MessageHandler(BotPlugin):
     def __init__(self, bot):
-        super().__init__()
-        self.log = logging.getLogger("MessageHandler")
-        self.bot = bot
+        super().__init__(bot)
+        self.message_handlers = defaultdict(set)
+        self.add_rtm_handler(self.handle_message, "message")
 
-    def get_rtm_handlers(self):
-        event_handlers = super().get_rtm_handlers()
-        event_handlers["message"].append(self.handle_message)
-        return event_handlers
+    def add_message_hanlder(self, handler_method, message_regex):
+        self.message_handlers[message_regex].add(handler_method)
 
     def get_message_handlers(self):
-        return defaultdict(list)
+        return self.message_handlers
 
     def handle_message(self, event):
         message_object = parse_slack_message(event)
         if message_object is not None and message_object.has_text:
+            print(self.get_message_handlers())
             for pattern in self.get_message_handlers():
                 match_object = re.search(pattern, message_object.text)
                 if match_object is not None:

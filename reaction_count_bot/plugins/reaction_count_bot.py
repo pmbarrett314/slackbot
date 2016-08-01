@@ -12,21 +12,27 @@ class ReactionCountBot(MessageHandler):
         self.emoji_counter = EmojiCounter(self.bot.slack_client)
         self.reset_data = reset_data
 
-    def get_rtm_handlers(self):
-        event_handlers = super().get_rtm_handlers()
-        event_handlers["reaction_added"].append(self.on_reaction_added)
-        event_handlers["reaction_removed"].append(self.on_reaction_removed)
-        return event_handlers
+        self.add_rtm_handler(self.on_reaction_added, "reaction_added")
+        self.add_rtm_handler(self.on_reaction_removed, "reaction_removed")
 
-    def get_startup_handlers(self):
-        startup_handlers = []
-        startup_handlers.append(self.prep_data)
-        return startup_handlers
+        self.add_startup_handler(self.prep_data)
 
-    def get_exit_handlers(self):
-        exit_handlers = []
-        exit_handlers.append(self.dump_data)
-        return exit_handlers
+        self.add_exit_handler(self.dump_data)
+
+        self.add_message_hanlder(self.handle_score_request, "\<@({})\>:? score \<@(.*)\>".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_score_me, "\<@({})\>:? score me".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_score_all, "\<@({})\>:? score all".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_upvote, "\<@({})\>:? upvote :(.*):".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_downvote, "\<@({})\>:? downvote :(.*):".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_log_votes, "\<@({})\>:? log_votes".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_list_votes, "\<@({})\>:? list votes".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_list_votes_detail, "\<@({})\>:? list detailed votes".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_table_flip, "\(╯°□°\）╯︵ ┻(━*)┻")
+        self.add_message_hanlder(self.handle_say, "\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_dm, "\<@({})\>:? dm \"(.*)\" to \<@(.*)\>".format(self.bot.bot_id))
+        self.add_message_hanlder(self.handle_tally, "\<@({})\>:? tally :(.*):".format(self.bot.bot_id))
+        self.add_message_hanlder(self.help, "\<@({})\>:? help".format(self.bot.bot_id))
+
 
     def prep_data(self):
         self.emoji_counter.prep(reset_data=self.reset_data)
@@ -34,24 +40,6 @@ class ReactionCountBot(MessageHandler):
     def dump_data(self):
         self.emoji_counter.dump_data()
 
-    def get_message_handlers(self):
-        message_handlers = super().get_message_handlers()
-        message_handlers["\<@({})\>:? score \<@(.*)\>".format(self.bot.bot_id)].append(self.handle_score_request)
-        message_handlers["\<@({})\>:? score me".format(self.bot.bot_id)].append(self.handle_score_me)
-        message_handlers["\<@({})\>:? score all".format(self.bot.bot_id)].append(self.handle_score_all)
-        message_handlers["\<@({})\>:? upvote :(.*):".format(self.bot.bot_id)].append(self.handle_upvote)
-        message_handlers["\<@({})\>:? downvote :(.*):".format(self.bot.bot_id)].append(self.handle_downvote)
-        message_handlers["\<@({})\>:? log_votes".format(self.bot.bot_id)].append(self.handle_log_votes)
-        message_handlers["\<@({})\>:? list votes".format(self.bot.bot_id)].append(self.handle_list_votes)
-        message_handlers["\<@({})\>:? list detailed votes".format(self.bot.bot_id)].append(
-            self.handle_list_votes_detail)
-        message_handlers["\(╯°□°\）╯︵ ┻(━*)┻"].append(self.handle_table_flip)
-        message_handlers["\<@({})\>:? say \"(.*)\" in \<#(.*)\>".format(self.bot.bot_id)].append(self.handle_say)
-        message_handlers["\<@({})\>:? dm \"(.*)\" to \<@(.*)\>".format(self.bot.bot_id)].append(self.handle_dm)
-        message_handlers["\<@({})\>:? tally :(.*):".format(self.bot.bot_id)].append(self.handle_tally)
-        message_handlers["\<@({})\>:? help".format(self.bot.bot_id)].append(self.help)
-
-        return message_handlers
 
     def help(self, match_object, message_object):
         sender = message_object.sender_id

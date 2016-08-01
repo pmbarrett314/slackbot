@@ -6,17 +6,14 @@ from slack_bot.slack_messages import parse_slack_message
 
 class DefaultLogHandler(BotPlugin):
     def __init__(self, bot):
-        self.bot = bot
+        super().__init__(bot)
 
-    def get_rtm_handlers(self):
-        event_handlers = super().get_rtm_handlers()
-        event_handlers["reconnect_url"].append(self.on_reconnect)
-        event_handlers["presence_change"].append(self.on_presence_change)
-        event_handlers["user_typing"].append(self.on_user_typing)
-        event_handlers["message"].append(self.on_message)
-        event_handlers["reaction_added"].append(self.on_reaction_added)
-        event_handlers["reaction_removed"].append(self.on_reaction_removed)
-        return event_handlers
+        self.add_rtm_handler(self.on_reconnect, "reconnect_url")
+        self.add_rtm_handler(self.on_presence_change, "presence_change")
+        self.add_rtm_handler(self.on_user_typing, "user_typing")
+        self.add_rtm_handler(self.on_message, "message")
+        self.add_rtm_handler(self.on_reaction_added, "reaction_added")
+        self.add_rtm_handler(self.on_reaction_removed, "reaction_removed")
 
     def on_reconnect(self, event):
         self.bot.log.debug("on_reconnect: {}".format(pprint.pformat(event)))

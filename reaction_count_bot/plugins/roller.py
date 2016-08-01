@@ -4,10 +4,9 @@ from plugins.message_handler import MessageHandler
 
 
 class Roller(MessageHandler):
-    def get_message_handlers(self):
-        message_handlers = super().get_message_handlers()
-        message_handlers["\<@({})\>:? roll (\d*)d(\d*)".format(self.bot.bot_id)].append(self.roll_dice)
-        return message_handlers
+    def __init__(self, bot):
+        super().__init__(bot)
+        self.add_message_hanlder(self.roll_dice, "\<@({})\>:? roll (\d*)d(\d*)".format(self.bot.bot_id))
 
     def roll_dice(self, match_object, message_object):
         rolls = []

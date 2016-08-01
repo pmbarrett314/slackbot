@@ -1,8 +1,13 @@
 from collections import defaultdict
+import logging
 
 
 class BotPlugin(object):
-    def __init__(self):
+    def __init__(self, bot):
+        self.bot = bot
+
+        self.log = logging.getLogger(type(self).__name__)
+
         self.startup_handlers = set()
         self.rtm_handlers = defaultdict(set)
         self.exit_handlers = set()
@@ -14,7 +19,7 @@ class BotPlugin(object):
         self.exit_handlers.add(method)
 
     def add_rtm_handler(self, method, event):
-        self.rtm_handlers[event] = method
+        self.rtm_handlers[event].add(method)
 
     def get_rtm_handlers(self):
         return self.rtm_handlers
