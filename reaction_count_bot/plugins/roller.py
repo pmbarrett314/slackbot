@@ -7,6 +7,7 @@ class Roller(MessageHandler):
     def __init__(self, bot):
         super().__init__(bot)
         self.add_message_hanlder(self.roll_dice, "roll (?P<number>\d*)d(?P<size>\d*)", address=True)
+        self.add_message_hanlder(self.flip_coin, "flip a coin", address=True)
 
     def roll_dice(self, match_object, message_object):
         rolls = []
@@ -38,3 +39,14 @@ class Roller(MessageHandler):
             return
 
         self.bot.say_in_channel(message, channel)
+
+    def flip_coin(self, match_object, message_object):
+        heads = "heads"
+        tails = "tails"
+
+        channel = message_object.channel
+
+
+        flip = random.choice([heads, tails])
+
+        self.bot.say_in_channel(flip, channel)

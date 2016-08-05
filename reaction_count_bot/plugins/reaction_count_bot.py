@@ -7,8 +7,6 @@ from plugins.reaction_counter import EmojiCounter
 class ReactionCountBot(MessageHandler):
     def __init__(self, bot, reset_data=False):
         super().__init__(bot)
-        self.bot = bot
-        self.log = logging.getLogger("ReactionCountBot")
         self.emoji_counter = EmojiCounter(self.bot.slack_client)
         self.reset_data = reset_data
 
@@ -28,8 +26,7 @@ class ReactionCountBot(MessageHandler):
         self.add_message_hanlder(self.handle_list_votes, "list votes", address=True)
         self.add_message_hanlder(self.handle_list_votes_detail, "list detailed votes", address=True)
         self.add_message_hanlder(self.handle_table_flip, "\(╯°□°\）╯︵ ┻(━*)┻")
-        self.add_message_hanlder(self.handle_say, "say \"(?P<message>.*)\" in \<#(?P<channel>.*)\>", address=True)
-        self.add_message_hanlder(self.handle_dm, "dm \"(?P<message>.*)\" to \<@(?P<user_id>.*)\>", address=True)
+        
         self.add_message_hanlder(self.handle_tally, "tally :(?P<reaction>.*):", address=True)
         self.add_message_hanlder(self.help, "help", address=True)
 
@@ -39,6 +36,11 @@ class ReactionCountBot(MessageHandler):
 
     def dump_data(self):
         self.emoji_counter.dump_data()
+
+    def handle_set_topic(self, match_object, message_object):
+        channel = match_object.group("channel")
+        topic = match_object.group("topic")
+        self.bot.slack_client.api_call("channels.setTopic", channel=channel, topic=topic)
 
 
     def help(self, match_object, message_object):

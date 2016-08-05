@@ -110,5 +110,8 @@ class Bot():
 
         self.say_in_channel(message, channel, log=False)
 
+    def set_topic(self, channel, topic):
+        self.slack_client.api_call("channels.setTopic", channel=channel, topic=topic)
+
     def add_reaction_to_message(self, reaction, channel, timestamp):
         return self.slack_client.api_call("reactions.add", name=reaction, channel=channel, timestamp=timestamp)

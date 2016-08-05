@@ -3,6 +3,7 @@ import os
 
 import coloredlogs
 
+from plugins.commands import Commands
 from plugins.default_log_handler import DefaultLogHandler
 from plugins.predefined_reactions import PredefinedReactions
 from plugins.reaction_count_bot import ReactionCountBot
@@ -56,11 +57,13 @@ if __name__ == "__main__":
 
     plugin = ReactionCountBot(bot, reset_data=False)
     roller = Roller(bot)
+    commands = Commands(bot)
     predefined_reactions = PredefinedReactions(bot)
     predefined_reactions.giphy_reactions = get_predefined_reactions()
     
     bot.register_plugin(plugin)
     bot.register_plugin(roller)
+    bot.register_plugin(commands)
     bot.register_plugin(predefined_reactions)
 
     bot.run()
